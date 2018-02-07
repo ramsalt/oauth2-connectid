@@ -1,12 +1,6 @@
 {
     "name": "ramsalt/oauth2-connectid",
     "description": "MediaConnect OAuth 2.0 Client Provider for The PHP League OAuth2-Client",
-    "require": {
-        "league/oauth2-google": "^2.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^5.7"
-    },
     "license": "GPL-3.0-or-later",
     "authors": [
         {
@@ -14,5 +8,29 @@
             "email": "esolitos@gmail.com"
         }
     ],
+    "keywords": [
+        "oauth",
+        "oauth2",
+        "client",
+        "authorization",
+        "mediaconnect",
+        "connectid"
+    ],
+    "require": {
+        "league/oauth2-google": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ramsalt\\OAuth2\\Client\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ramsalt\\OAuth2\\Client\\Test\\": "tests/src/"
+        }
+    },
     "minimum-stability": "stable"
 }
