@@ -31,12 +31,27 @@ class ConnectId extends AbstractProvider {
     return $this->getLoginUrl('token');
   }
 
+  protected function getAccessTokenUrl(array $params) {
+    $url = $this->getBaseAccessTokenUrl($params);
+    // ConnectID expects the parameters in the urls not the body also for the POST
+    $query = $this->getAccessTokenQuery($params);
+    return $this->appendQuery($url, $query);
+  }
+
   public function getResourceOwnerDetailsUrl(AccessToken $token) {
-    return $this->getClientApiUrl('/v1/customer/profile ');
+    return $this->getClientApiUrl('v1/customer/profile');
   }
 
   protected function getDefaultScopes() {
     return [];
+  }
+
+  protected function getDefaultHeaders() {
+    $http_headers = parent::getDefaultHeaders();
+
+    $http_headers['accept'] = 'application/json';
+
+    return $http_headers;
   }
 
   /**
@@ -57,7 +72,7 @@ class ConnectId extends AbstractProvider {
   }
 
   protected function createResourceOwner(array $response, AccessToken $token) {
-    $foo = $response;
+    return ConnectIdProfile::createFromApiResponse($response);
   }
 
   /**
@@ -68,9 +83,9 @@ class ConnectId extends AbstractProvider {
    * @return string
    */
   protected function getLoginUrl(string $extra_path) {
-    $domain = ($this->testing) ? 'api-test.mediaconnect.no' : 'connectid.no';
+    $base = ($this->testing) ? 'api-test.mediaconnect.no/login' : 'connectid.no/user';
 
-    return "https://{$domain}/user/oauth/{$extra_path}";
+    return "https://{$base}/oauth/{$extra_path}";
   }
 
   /**
@@ -79,9 +94,8 @@ class ConnectId extends AbstractProvider {
    * @return string
    */
   protected function getClientApiUrl(string $extra_path) {
-    $domain = ($this->testing) ? 'api-test.mediaconnect.no' : 'api.connectid.no';
+    $domain = ($this->testing) ? 'api-test.mediaconnect.no' : 'api.mediaconnect.no';
 
     return "https://{$domain}/capi/{$extra_path}";
   }
-
 }
