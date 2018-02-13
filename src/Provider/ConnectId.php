@@ -98,4 +98,22 @@ class ConnectId extends AbstractProvider {
 
     return "https://{$domain}/capi/{$extra_path}";
   }
+
+  /* ========================= ConnectID API ========================= */
+
+  public function getApiCustomerProduct(AccessToken $token) {
+    $url = $this->getClientApiUrl('v1/customer/product');
+    // $options['headers'], $options['body'], $options['version']
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
+
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response)) {
+      throw new UnexpectedValueException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    return $response;
+  }
 }
