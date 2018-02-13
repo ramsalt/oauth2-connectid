@@ -99,6 +99,19 @@ class ConnectId extends AbstractProvider {
     return "https://{$domain}/capi/{$extra_path}";
   }
 
+  /**
+   * @param \League\OAuth2\Client\Token\AccessToken $token
+   *
+   * @return \League\OAuth2\Client\Token\AccessToken
+   */
+  public function getRefreshedAccessToken(AccessToken $token) {
+    $fresh_access_token = $this->getAccessToken('refresh_token', [
+      'refresh_token' => $token->getRefreshToken(),
+    ]);
+
+    return $fresh_access_token;
+  }
+
   /* ========================= ConnectID API ========================= */
 
   public function getApiCustomerProduct(AccessToken $token) {
