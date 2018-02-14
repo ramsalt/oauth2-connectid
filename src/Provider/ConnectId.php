@@ -9,7 +9,7 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
-use Ramsalt\OAuth2\Client\Provider\Exception\ExpiredTokenException;
+use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
 
 class ConnectId extends AbstractProvider {
 
@@ -68,7 +68,7 @@ class ConnectId extends AbstractProvider {
 
     // Check if the error is to be attributed to an expired Access Token.
     if ($statusCode == 401 && $data['error'] == self::ERROR_AUTH_INVALID_TOKEN) {
-      throw new ExpiredTokenException(
+      throw new InvalidAccessTokenException(
         $data['error_description'],
         $statusCode,
         $response
