@@ -10,10 +10,12 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
+use Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException;
 
 class ConnectId extends AbstractProvider {
 
   const ERROR_AUTH_INVALID_TOKEN = 'invalid_token';
+  const ERROR_AUTH_INVALID_GRANT = 'invalid_grant';
 
   use BearerAuthorizationTrait;
   /*
@@ -65,6 +67,14 @@ class ConnectId extends AbstractProvider {
    */
   protected function checkResponse(ResponseInterface $response, $data) {
     $statusCode = $response->getStatusCode();
+
+    if ($statusCode == 400 && $data['error'] == self::ERROR_AUTH_INVALID_GRANT) {
+      throw new InvalidGrantException(
+        $data['error_description'],
+        $statusCode,
+        $response
+      );
+    }
 
     // Check if the error is to be attributed to an expired Access Token.
     if ($statusCode == 401 && $data['error'] == self::ERROR_AUTH_INVALID_TOKEN) {
