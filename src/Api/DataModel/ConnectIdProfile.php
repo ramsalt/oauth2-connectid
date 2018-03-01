@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: esolitos
- * Date: 01/02/2018
- * Time: 16:32
- */
 
-namespace Ramsalt\OAuth2\Client\DataModel;
+namespace ConnectID\Api\DataModel;
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
@@ -95,7 +89,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   /**
    * @param array $data
    *
-   * @return \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile
+   * @return \ConnectID\Api\DataModel\ConnectIdProfile
    */
   public static function createFromApiResponse(array $data): ConnectIdProfile {
     $profile = new static($data);
@@ -139,7 +133,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/customer/profile.html
    * @see https://doc.mediaconnect.no/doc/ConnectID/v2/api/customer/profile.html
    *
-   * @param \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile $profile
+   * @param \ConnectID\Api\DataModel\ConnectIdProfile $profile
    * @param array $data
    */
   public static function setDataFromKeys(ConnectIdProfile $profile, array $data) {
@@ -387,7 +381,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   /**
    * @param array $credential
    *
-   * @return \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile
+   * @return \ConnectID\Api\DataModel\ConnectIdProfile
    */
   public function withCombinedCredential(array $credential): ConnectIdProfile {
     /*

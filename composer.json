@@ -24,7 +24,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Ramsalt\\OAuth2\\Client\\": "src/"
+            "Ramsalt\\OAuth2\\Client\\": "src/",
+            "ConnectID\\Api\\": "src/Api"
         }
     },
     "autoload-dev": {

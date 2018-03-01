@@ -11,6 +11,7 @@ use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException;
+use ConnectID\Api\DataModel\ConnectIdProfile;
 
 class ConnectId extends AbstractProvider {
 
