@@ -3,6 +3,8 @@
 namespace Ramsalt\OAuth2\Client\Provider;
 
 
+use ConnectID\Api\DataModel\Order;
+use ConnectID\Api\DataModel\OrdersOverview;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -139,7 +141,15 @@ class ConnectId extends AbstractProvider {
 
   /* ========================= ConnectID API ========================= */
 
-  public function getApiCustomerProduct(AccessToken $token) {
+  /**
+   *
+   * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/customer/product.html#Product_API
+   *
+   * @param \League\OAuth2\Client\Token\AccessToken $token
+   *
+   * @return array
+   */
+  public function getApiCustomerProduct(AccessToken $token): array {
     $url = $this->getClientApiUrl('v1/customer/product');
     // $options['headers'], $options['body'], $options['version']
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
@@ -153,5 +163,59 @@ class ConnectId extends AbstractProvider {
     }
 
     return $response;
+  }
+
+  /**
+   *
+   * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/order.html#PaymentInfo
+   *
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   *
+   * @return \ConnectID\Api\DataModel\OrdersOverview
+   */
+  public function getApiOrdersOverview(AccessToken $accessToken): OrdersOverview {
+    $url = $this->getClientApiUrl('v1/order/status');
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token, $options);
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response)) {
+      throw new UnexpectedValueException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    return $response;
+  }
+
+  /**
+   * 
+   * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/order.html#PaymentInfo
+   *
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   *
+   * @return \ConnectID\Api\DataModel\OrderStatus[]
+   */
+  public function getApiOrderStatus(AccessToken $accessToken, string $orderId, bool $isExternalId = FALSE): array {
+    // Use a different key based on the OrderID type
+    $orderIdKey = $isExternalId ? 'externalOrderId' : 'orderId';
+
+    $options['headers'] = ['Content-Type' => 'application/json'];
+    $options['body'] = json_encode([$orderIdKey => $orderId]);
+
+    $url = $this->getClientApiUrl('v1/order/status');
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token, $options);
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response)) {
+      throw new UnexpectedValueException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    return $response;
+  }
+
+  public function submitApiOrder(AccessToken $token, Order $order) {
+
   }
 }
