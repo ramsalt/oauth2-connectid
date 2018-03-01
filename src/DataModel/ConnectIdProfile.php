@@ -6,7 +6,7 @@
  * Time: 16:32
  */
 
-namespace Ramsalt\OAuth2\Client\Provider;
+namespace Ramsalt\OAuth2\Client\DataModel;
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
