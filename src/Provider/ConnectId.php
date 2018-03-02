@@ -139,6 +139,19 @@ class ConnectId extends AbstractProvider {
     return $fresh_access_token;
   }
 
+  /**
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   *
+   * @return \League\OAuth2\Client\Token\AccessToken
+   */
+  public function getClientCredentialsAccessToken(AccessToken $accessToken) {
+    $client_credentials_token = $this->getAccessToken('client_credentials', [
+      'refresh_token' => $token->getRefreshToken(),
+    ]);
+
+    return $client_credentials_token;
+  }
+
   /* ========================= ConnectID API ========================= */
 
   /**
@@ -161,6 +174,9 @@ class ConnectId extends AbstractProvider {
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
+
+    // Get the new token for client credentials
+    $this->getAccessToken('client_credentials');
 
     return $response;
   }
@@ -188,7 +204,7 @@ class ConnectId extends AbstractProvider {
   }
 
   /**
-   * 
+   *
    * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/order.html#PaymentInfo
    *
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
@@ -217,5 +233,24 @@ class ConnectId extends AbstractProvider {
 
   public function submitApiOrder(AccessToken $token, Order $order) {
 
+  }
+
+  /**
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   *
+   * @return array
+   */
+  public function getClientApiProducts(AccessToken $accessToken) {
+    $url = $this->getClientApiUrl('v1/client/product');
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token, $options);
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response)) {
+      throw new UnexpectedValueException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    return $response;
   }
 }
