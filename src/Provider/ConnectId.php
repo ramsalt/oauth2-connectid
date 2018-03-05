@@ -5,6 +5,7 @@ namespace Ramsalt\OAuth2\Client\Provider;
 
 use ConnectID\Api\DataModel\Order;
 use ConnectID\Api\DataModel\OrdersOverview;
+use ConnectID\Api\DataModel\ProductTypeList;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
@@ -131,7 +132,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return \League\OAuth2\Client\Token\AccessToken
    */
-  public function getRefreshedAccessToken(AccessToken $token) {
+  public function getRefreshedAccessToken(AccessToken $accessToken) {
     $fresh_access_token = $this->getAccessToken('refresh_token', [
       'refresh_token' => $token->getRefreshToken(),
     ]);
@@ -144,10 +145,8 @@ class ConnectId extends AbstractProvider {
    *
    * @return \League\OAuth2\Client\Token\AccessToken
    */
-  public function getClientCredentialsAccessToken(AccessToken $accessToken) {
-    $client_credentials_token = $this->getAccessToken('client_credentials', [
-      'refresh_token' => $token->getRefreshToken(),
-    ]);
+  public function getClientCredentialsAccessToken() {
+    $client_credentials_token = $this->getAccessToken('client_credentials');
 
     return $client_credentials_token;
   }
@@ -238,19 +237,19 @@ class ConnectId extends AbstractProvider {
   /**
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
    *
-   * @return array
+   * @return ProductTypeList
    */
   public function getClientApiProducts(AccessToken $accessToken) {
     $url = $this->getClientApiUrl('v1/client/product');
-    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token, $options);
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
-    if (false === is_array($response)) {
+    if (!is_array($response) || !isset($response['products'])) {
       throw new UnexpectedValueException(
-        'Invalid response received from Authorization Server. Expected JSON.'
+        'Invalid response received from API Server. Exp[ected json with a "products" key.'
       );
     }
 
-    return $response;
+    return ProductTypeList::fromDataArray($response['products']);
   }
 }
