@@ -3,7 +3,7 @@
 namespace ConnectID\Api\DataModel;
 
 
-class ProductType {
+class ProductType extends BasicType {
 
   /**
    * @var string
@@ -71,32 +71,17 @@ class ProductType {
   protected $digital;
 
   /**
-   * Holds any additional information.
-   *
-   * @var array
+   * @inheritdoc
    */
-  protected $extra;
-
-  public static function create(array $data) {
-    $product = new static();
-    foreach ($data as $key => $datum) {
-      // If it's product property jsut set on the right location
-      // otherwise store it in the "extra" array
-      if (property_exists($product, $key)) {
-        $product->{$key} = $datum;
-      } else {
-        $product->extra[$key] = $datum;
-      }
-    }
-
-    return $product;
+  public function getId(): string {
+    return $this->getCompanyCode() . ':' . $this->getProduct();
   }
 
   /**
    * @return string
    */
   public function getCompanyCode(): string {
-    return $this->companyCode;
+    return $this->companyCode ?: '';
   }
 
   /**
@@ -113,7 +98,7 @@ class ProductType {
    * @return string
    */
   public function getProduct(): string {
-    return $this->product;
+    return $this->product ?: '';
   }
 
   /**
@@ -130,7 +115,7 @@ class ProductType {
    * @return string
    */
   public function getDescription(): string {
-    return $this->description;
+    return $this->description ?: '';
   }
 
   /**
@@ -147,7 +132,7 @@ class ProductType {
    * @return string
    */
   public function getProductType(): string {
-    return $this->productType;
+    return $this->productType ?: '';
   }
 
   /**
@@ -155,7 +140,7 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withProductType(string $productType): ProductType {
+  public function withProductType(?string $productType): ProductType {
     $this->productType = $productType;
     return $this;
   }
@@ -163,41 +148,44 @@ class ProductType {
   /**
    * @return \DateTimeImmutable
    */
-  public function getStartTime(): \DateTimeImmutable {
+  public function getStartTime(): ?\DateTimeImmutable {
     return $this->startTime;
   }
 
   /**
-   * @param \DateTimeImmutable $startTime
+   * @param \DateTimeImmutable|\DateTime|int $startTime
+   *   Either a \DateTimeImmutable, a \DateTime object or a unix timestamp (UTC).
    *
    * @return ProductType
    */
-  public function withStartTime(\DateTimeImmutable $startTime): ProductType {
-    $this->startTime = $startTime;
+  public function withStartTime($timeValue): ProductType {
+    $this->startTime = $this->getDateTimeFromData($timeValue);
+
     return $this;
   }
 
   /**
    * @return \DateTimeImmutable
    */
-  public function getEndTime(): \DateTimeImmutable {
+  public function getEndTime(): ?\DateTimeImmutable {
     return $this->endTime;
   }
 
   /**
-   * @param \DateTimeImmutable $endTime
+   * @param \DateTimeImmutable|\DateTime|int $startTime
+   *   Either a \DateTimeImmutable, a \DateTime object or a unix timestamp (UTC).
    *
    * @return ProductType
    */
-  public function withEndTime(\DateTimeImmutable $endTime): ProductType {
-    $this->endTime = $endTime;
+  public function withEndTime($timeValue): ProductType {
+    $this->startTime = $this->getDateTimeFromData($timeValue);
     return $this;
   }
 
   /**
    * @return float
    */
-  public function getWeight(): float {
+  public function getWeight(): ?float {
     return $this->weight;
   }
 
@@ -206,8 +194,13 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withWeight(float $weight): ProductType {
-    $this->weight = $weight;
+  public function withWeight($weight): ProductType {
+    if (is_numeric($weight)) {
+      $this->weight = (float) $weight;
+    }
+    elseif (!empty($weight)) {
+      throw new \InvalidArgumentException("Invalid numeric value: " . $weight);
+    }
     return $this;
   }
 
@@ -215,7 +208,7 @@ class ProductType {
    * @return string
    */
   public function getCampaigns(): string {
-    return $this->campaigns;
+    return $this->campaigns ?: '';
   }
 
   /**
@@ -223,7 +216,7 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withCampaigns(string $campaigns): ProductType {
+  public function withCampaigns(?string $campaigns): ProductType {
     $this->campaigns = $campaigns;
     return $this;
   }
@@ -232,7 +225,7 @@ class ProductType {
    * @return string
    */
   public function getCurrency(): string {
-    return $this->currency;
+    return $this->currency ?: '';
   }
 
   /**
@@ -240,7 +233,7 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withCurrency(string $currency): ProductType {
+  public function withCurrency(?string $currency): ProductType {
     $this->currency = $currency;
     return $this;
   }
@@ -248,7 +241,7 @@ class ProductType {
   /**
    * @return float
    */
-  public function getWebOfferPrice(): float {
+  public function getWebOfferPrice(): ?float {
     return $this->webOfferPrice;
   }
 
@@ -257,15 +250,21 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withWebOfferPrice(float $webOfferPrice): ProductType {
-    $this->webOfferPrice = $webOfferPrice;
+  public function withWebOfferPrice($webOfferPrice): ProductType {
+    if (is_numeric($webOfferPrice)) {
+      $this->webOfferPrice = (float) $webOfferPrice;
+    }
+    elseif (!empty($webOfferPrice)) {
+      throw new \InvalidArgumentException("Invalid numeric value: " . $webOfferPrice);
+    }
+
     return $this;
   }
 
   /**
    * @return float
    */
-  public function getRetailPrice(): float {
+  public function getRetailPrice(): ?float {
     return $this->retailPrice;
   }
 
@@ -274,8 +273,14 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withRetailPrice(float $retailPrice): ProductType {
-    $this->retailPrice = $retailPrice;
+  public function withRetailPrice($retailPrice): ProductType {
+    if (is_numeric($retailPrice)) {
+      $this->retailPrice = (float) $retailPrice;
+    }
+    elseif (!empty($retailPrice)) {
+      throw new \InvalidArgumentException("Invalid numeric value: " . $retailPrice);
+    }
+
     return $this;
   }
 
@@ -291,8 +296,11 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withVatPercent(float $vatPercent): ProductType {
-    $this->vatPercent = $vatPercent;
+  public function withVatPercent($vatPercent): ProductType {
+    if (!is_numeric($vatPercent)) {
+      throw new \InvalidArgumentException("Invalid numeric value: " . $vatPercent);
+    }
+    $this->vatPercent = (float) $vatPercent;
     return $this;
   }
 
@@ -308,39 +316,8 @@ class ProductType {
    *
    * @return ProductType
    */
-  public function withDigital(bool $digital): ProductType {
-    $this->digital = $digital;
+  public function withDigital($digital): ProductType {
+    $this->digital = (bool) $digital;
     return $this;
-  }
-
-  public function toArray(): array {
-    $properties = get_object_vars($this);
-    if (!empty($properties['extra'])) {
-      // There should be no overlap due to the fact that we set 'extra' to be any
-      // non-class property in the constructor.
-      foreach ($properties['extra'] as $extra_key => $extra_property){
-        $properties[$extra_key] = $extra_property;
-      }
-    }
-    // Remove this key as it's "internal"
-    unset($properties['extra']);
-    // Remove NULL values, but leave other false/zero values
-    array_filter($properties, function ($value){
-      return ! is_null($value);
-    });
-
-    return $properties;
-  }
-
-  /**
-   * Magical method to fetch info from the $extra property.
-   * @param $name
-   */
-  public function __get($name) {
-    if (isset($this->extra[$name])) {
-      return $this->extra[$name];
-    }
-
-    throw new \InvalidArgumentException("Missing property {$name}.");
   }
 }

@@ -3,8 +3,11 @@
 namespace Ramsalt\OAuth2\Client\Provider;
 
 
+use ConnectID\Api\DataModel\CouponType;
+use ConnectID\Api\DataModel\CouponTypeList;
 use ConnectID\Api\DataModel\Order;
 use ConnectID\Api\DataModel\OrdersOverview;
+use ConnectID\Api\DataModel\ProductType;
 use ConnectID\Api\DataModel\ProductTypeList;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -251,5 +254,24 @@ class ConnectId extends AbstractProvider {
     }
 
     return ProductTypeList::fromDataArray($response['products']);
+  }
+
+  /**
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   *
+   * @return ProductTypeList
+   */
+  public function getClientApiCoupons(AccessToken $accessToken, ProductType $productType) {
+    $url = $this->getClientApiUrl('v1/client/coupon/' . $productType->getProduct());
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
+    $response = $this->getParsedResponse($request);
+
+    if (!is_array($response) || !isset($response['coupons'])) {
+      throw new \UnexpectedValueException(
+        'Invalid response received from API Server. Expected json with a "products" key.'
+      );
+    }
+
+    return CouponTypeList::fromDataArray($response['coupons']);
   }
 }
