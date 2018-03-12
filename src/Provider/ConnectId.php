@@ -7,6 +7,7 @@ use ConnectID\Api\DataModel\CouponType;
 use ConnectID\Api\DataModel\CouponTypeList;
 use ConnectID\Api\DataModel\Order;
 use ConnectID\Api\DataModel\OrdersOverview;
+use ConnectID\Api\DataModel\OrderStatus;
 use ConnectID\Api\DataModel\ProductType;
 use ConnectID\Api\DataModel\ProductTypeList;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -16,6 +17,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
+use Ramsalt\OAuth2\Client\Provider\Exception\InvalidApiResponseException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException;
 use ConnectID\Api\DataModel\ConnectIdProfile;
 
@@ -36,11 +38,11 @@ class ConnectId extends AbstractProvider {
   protected $testing = FALSE;
 
   public function getBaseAuthorizationUrl() {
-    return $this->getLoginUrl('authorize');
+    return $this->getOAuthUrl('authorize');
   }
 
   public function getBaseAccessTokenUrl(array $params) {
-    return $this->getLoginUrl('token');
+    return $this->getOAuthUrl('token');
   }
 
   protected function getAccessTokenUrl(array $params) {
@@ -75,9 +77,18 @@ class ConnectId extends AbstractProvider {
   protected function checkResponse(ResponseInterface $response, $data) {
     $statusCode = $response->getStatusCode();
 
+    // Exception on the other side
+    if ($statusCode == 400 && isset($data['exceptionType'], $data['errorMessage'])) {
+      throw new InvalidApiResponseException(
+        "[{$data['exceptionType']}] {$data['errorMessage']}",
+        $statusCode,
+        $response
+      );
+    }
+
     if ($statusCode == 400 && $data['error'] == self::ERROR_AUTH_INVALID_GRANT) {
       throw new InvalidGrantException(
-        $data['error_description'],
+        $data['error_description'] ?? $data['error'],
         $statusCode,
         $response
       );
@@ -86,7 +97,7 @@ class ConnectId extends AbstractProvider {
     // Check if the error is to be attributed to an expired Access Token.
     if ($statusCode == 401 && $data['error'] == self::ERROR_AUTH_INVALID_TOKEN) {
       throw new InvalidAccessTokenException(
-        $data['error_description'],
+        $data['error_description'] ?? $data['error'],
         $statusCode,
         $response
       );
@@ -94,11 +105,15 @@ class ConnectId extends AbstractProvider {
 
     // Fallback to a generic exception
     if ($statusCode >= 400) {
-      throw new IdentityProviderException(
-        isset($data['error_description']) ? $data['error_description'] : $response->getReasonPhrase(),
-        $statusCode,
-        $response
-      );
+      if (isset($data['error_description'])) {
+        $message = $data['error_description'];
+      } elseif (isset($data['errorMessage'])) {
+        $message = $data['exceptionType'] . ' => ' . $data['errorMessage'];
+      } else {
+        $message = $response->getReasonPhrase();
+      }
+
+      throw new InvalidApiResponseException($message, $statusCode, $response);
     }
   }
 
@@ -113,10 +128,21 @@ class ConnectId extends AbstractProvider {
    *
    * @return string
    */
-  protected function getLoginUrl(string $extra_path) {
+  protected function getOAuthUrl(string $extra_path) {
+    return $this->getLoginApiUrl("oauth/{$extra_path}");
+  }
+
+  /**
+   * Returns the url for login authentication process.
+   *
+   * @param string $extra_path
+   *
+   * @return string
+   */
+  protected function getLoginApiUrl(string $extra_path) {
     $base = ($this->testing) ? 'api-test.mediaconnect.no/login' : 'connectid.no/user';
 
-    return "https://{$base}/oauth/{$extra_path}";
+    return "https://{$base}/{$extra_path}";
   }
 
   /**
@@ -137,7 +163,7 @@ class ConnectId extends AbstractProvider {
    */
   public function getRefreshedAccessToken(AccessToken $accessToken) {
     $fresh_access_token = $this->getAccessToken('refresh_token', [
-      'refresh_token' => $token->getRefreshToken(),
+      'refresh_token' => $accessToken->getRefreshToken(),
     ]);
 
     return $fresh_access_token;
@@ -213,28 +239,71 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\OrderStatus[]
    */
-  public function getApiOrderStatus(AccessToken $accessToken, string $orderId, bool $isExternalId = FALSE): array {
-    // Use a different key based on the OrderID type
-    $orderIdKey = $isExternalId ? 'externalOrderId' : 'orderId';
+  public function getClientApiOrderStatus(string $orderId): OrderStatus {
+    $url = $this->getClientApiUrl('v1/client/order/status/'.$orderId);
+    $accessToken = $this->getClientCredentialsAccessToken();
 
-    $options['headers'] = ['Content-Type' => 'application/json'];
-    $options['body'] = json_encode([$orderIdKey => $orderId]);
-
-    $url = $this->getClientApiUrl('v1/order/status');
-    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token, $options);
+    $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken)
+      ->withAddedHeader('Content-Type', 'application/json');
     $response = $this->getParsedResponse($request);
 
-    if (false === is_array($response)) {
+    if (false === is_array($response) || !isset($response['orders'])) {
       throw new UnexpectedValueException(
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
 
-    return $response;
+    // Always one order will be returned.
+    $order_data = reset($response['orders']);
+
+    return OrderStatus::create($order_data);;
   }
 
-  public function submitApiOrder(AccessToken $token, Order $order) {
+  /**
+   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   * @param \ConnectID\Api\DataModel\Order $order
+   *
+   * @return \ConnectID\Api\DataModel\Order
+   */
+  public function submitApiOrder(AccessToken $accessToken, Order $order) {
+    $url = $this->getClientApiUrl('v1/order');
+    $options = [
+      'body' => $order->toJson(),
+    ];
+    $request = $this->getAuthenticatedRequest(self::METHOD_POST, $url, $accessToken, $options)
+      ->withAddedHeader('Content-Type', 'application/json');
 
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response) || !isset($response['orderId'])) {
+      throw new UnexpectedValueException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    $order->withOrderId($response['orderId']);
+
+    return $order;
+  }
+
+  /**
+   * @param \ConnectID\Api\DataModel\Order $order
+   *
+   * @return string
+   */
+  public function getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
+    $params = [
+      'clientId'  => $this->clientId,
+      'orderId'   => $order->getOrderId(),
+      'returnUrl' => $returnUrl,
+      'errorUrl'  => $errorUrl,
+    ];
+
+    $url = $this->getLoginApiUrl('order');
+    // ConnectID expects the parameters in the urls not the body also for the POST
+    $query = $this->getAccessTokenQuery($params);
+
+    return $this->appendQuery($url, $query);
   }
 
   /**

@@ -3,7 +3,7 @@
 namespace ConnectID\Api\DataModel;
 
 
-class OrderLine {
+class OrderLine extends BasicData {
 
   /**
    * @var string
@@ -104,7 +104,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setProductSpecCode(string $productSpecCode): OrderLine {
+  public function withProductSpecCode(string $productSpecCode): OrderLine {
     $this->productSpecCode = $productSpecCode;
     return $this;
   }
@@ -121,7 +121,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setProductSpecNo(int $productSpecNo): OrderLine {
+  public function withProductSpecNo(int $productSpecNo): OrderLine {
     $this->productSpecNo = $productSpecNo;
     return $this;
   }
@@ -138,7 +138,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setProduct(string $product): OrderLine {
+  public function withProduct(string $product): OrderLine {
     $this->product = $product;
     return $this;
   }
@@ -155,7 +155,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setQuantity(int $quantity): OrderLine {
+  public function withQuantity(int $quantity): OrderLine {
     $this->quantity = $quantity;
     return $this;
   }
@@ -172,7 +172,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setUnitPrice(float $unitPrice): OrderLine {
+  public function withUnitPrice(float $unitPrice): OrderLine {
     $this->unitPrice = $unitPrice;
     return $this;
   }
@@ -189,7 +189,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setVoucherCode(string $voucherCode): OrderLine {
+  public function withVoucherCode(string $voucherCode): OrderLine {
     $this->voucherCode = $voucherCode;
     return $this;
   }
@@ -206,7 +206,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setAllowAccessProduct(string $allowAccessProduct): OrderLine {
+  public function withAllowAccessProduct(string $allowAccessProduct): OrderLine {
     $this->allowAccessProduct = $allowAccessProduct;
     return $this;
   }
@@ -223,7 +223,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setAllowAccessSeconds(int $allowAccessSeconds): OrderLine {
+  public function withAllowAccessSeconds(int $allowAccessSeconds): OrderLine {
     $this->allowAccessSeconds = $allowAccessSeconds;
     return $this;
   }
@@ -240,7 +240,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setStartInfo(array $startInfo): OrderLine {
+  public function withStartInfo(array $startInfo): OrderLine {
     $this->startInfo = $startInfo;
     return $this;
   }
@@ -257,7 +257,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setRewardPartnerId(string $rewardPartnerId): OrderLine {
+  public function withRewardPartnerId(string $rewardPartnerId): OrderLine {
     $this->rewardPartnerId = $rewardPartnerId;
     return $this;
   }
@@ -274,7 +274,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setRewardId(string $rewardId): OrderLine {
+  public function withRewardId(string $rewardId): OrderLine {
     $this->rewardId = $rewardId;
     return $this;
   }
@@ -291,7 +291,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setReceiver(\ConnectID\Api\DataModel\Address $receiver): OrderLine {
+  public function withReceiver(\ConnectID\Api\DataModel\Address $receiver): OrderLine {
     $this->receiver = $receiver;
     return $this;
   }
@@ -308,7 +308,7 @@ class OrderLine {
    *
    * @return OrderLine
    */
-  public function setRecruiter(\ConnectID\Api\DataModel\Address $recruiter): OrderLine {
+  public function withRecruiter(\ConnectID\Api\DataModel\Address $recruiter): OrderLine {
     $this->recruiter = $recruiter;
     return $this;
   }

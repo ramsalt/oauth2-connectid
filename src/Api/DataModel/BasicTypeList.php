@@ -3,7 +3,7 @@
 namespace ConnectID\Api\DataModel;
 
 
-abstract class BasicTypeList implements \Countable, \Iterator {
+abstract class BasicTypeList extends BasicList implements \Countable, \Iterator {
 
   /**
    * @var array

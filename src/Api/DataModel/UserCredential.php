@@ -3,7 +3,7 @@
 namespace ConnectID\Api\DataModel;
 
 
-class UserCredential {
+class UserCredential extends BasicData {
 
   const TYPE_MAIL = 'A';
   const TYPE_MOBILE = 'B'; // sms-capable

@@ -3,7 +3,7 @@
 namespace ConnectID\Api\DataModel;
 
 
-class Address {
+class Address extends BasicData {
 
   /**
    * @var string

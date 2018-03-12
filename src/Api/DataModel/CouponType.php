@@ -122,7 +122,7 @@ class CouponType extends BasicType {
   /**
    * @return string
    */
-  public function getDescription(): string {
+  public function getDescription(): ?string {
     return $this->description;
   }
 

@@ -2,7 +2,18 @@
 
 namespace ConnectID\Api\DataModel;
 
-class Order {
+class Order extends BasicData {
+
+  const PAYMENT_TYPE_CARD = 'creditcard';
+  const PAYMENT_TYPE_INVOICE = 'invoice';
+  const PAYMENT_TYPE_FREE = 'free';
+  const PAYMENT_TYPE_SMS = 'sms';
+  const PAYMENT_TYPE_PASS = 'masterpass';
+
+  /**
+   * @var int
+   */
+  protected $orderId;
 
   /**
    * @var string
@@ -65,9 +76,26 @@ class Order {
   protected $prepaid;
 
   /**
-   * @var \ConnectID\Api\DataModel\PaymentIndo
+   * @var \ConnectID\Api\DataModel\PaymentInfo
    */
   protected $paymentInfo;
+
+  /**
+   * @return int
+   */
+  public function getOrderId(): int {
+    return $this->orderId;
+  }
+
+  /**
+   * @param int $orderId
+   *
+   * @return Order
+   */
+  public function withOrderId(int $orderId): Order {
+    $this->orderId = $orderId;
+    return $this;
+  }
 
   /**
    * @return string
@@ -278,29 +306,50 @@ class Order {
   }
 
   /**
+   * @see self::setPrepaid()
+   *
+   * @return \ConnectID\Api\DataModel\Order
+   */
+  public function withPrepaid(bool $prepaid): Order {
+    $this->setPrepaid($prepaid);
+    return $this;
+  }
+
+  /**
    * @param bool $prepaid
    *
    * @return Order
    */
-  public function withPrepaid(bool $prepaid): Order {
+  public function setPrepaid(bool $prepaid) {
     $this->prepaid = $prepaid;
-    return $this;
   }
 
   /**
-   * @return \ConnectID\Api\DataModel\PaymentIndo
+   * @return \ConnectID\Api\DataModel\PaymentInfo
    */
-  public function getPaymentInfo(): \ConnectID\Api\DataModel\PaymentIndo {
+  public function getPaymentInfo(): \ConnectID\Api\DataModel\PaymentInfo {
     return $this->paymentInfo;
   }
 
   /**
-   * @param \ConnectID\Api\DataModel\PaymentIndo $paymentInfo
+   * @param \ConnectID\Api\DataModel\PaymentInfo $paymentInfo
    *
    * @return Order
    */
-  public function withPaymentInfo(\ConnectID\Api\DataModel\PaymentIndo $paymentInfo): Order {
+  public function withPaymentInfo(\ConnectID\Api\DataModel\PaymentInfo $paymentInfo): Order {
     $this->paymentInfo = $paymentInfo;
     return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function toJson(): string {
+    $data = $this->toArray();
+
+    // Override date fields
+    $data['orderDate'] = $this->getFormattedDate($this->orderDate);
+
+    return json_encode($data);
   }
 }
