@@ -324,6 +324,17 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   }
 
   /**
+   * @return string
+   */
+  public function getEmailDefault(): ?string {
+    if (!empty($this->emails)) {
+      return reset($this->emails);
+    }
+
+    return NULL;
+  }
+
+  /**
    * @param array $emailAddresses
    *
    * @return ConnectIdProfile
@@ -348,6 +359,20 @@ class ConnectIdProfile implements ResourceOwnerInterface {
     $this->emails[] = $address;
     $this->emails = array_unique($this->emails);
     return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isEmailCredential(): bool {
+    return strtoupper($this->getCredentialType()) === 'A';
+  }
+
+  /**
+   * @return bool
+   */
+  public function isPhoneCredential(): bool {
+    return strtoupper($this->getCredentialType()) === 'B';
   }
 
   /**
