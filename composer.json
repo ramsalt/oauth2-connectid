@@ -17,14 +17,15 @@
         "connectid"
     ],
     "require": {
-        "league/oauth2-google": "^2.0"
+        "league/oauth2-client": " ^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"
     },
     "autoload": {
         "psr-4": {
-            "Ramsalt\\OAuth2\\Client\\": "src/"
+            "Ramsalt\\OAuth2\\Client\\": "src/",
+            "ConnectID\\Api\\": "src/Api"
         }
     },
     "autoload-dev": {

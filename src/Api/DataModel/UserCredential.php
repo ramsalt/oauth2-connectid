@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: esolitos
- * Date: 02/02/2018
- * Time: 15:22
- */
 
-namespace Ramsalt\OAuth2\Client\Provider;
+namespace ConnectID\Api\DataModel;
 
 
-class UserCredential {
+class UserCredential extends BasicData {
 
   const TYPE_MAIL = 'A';
   const TYPE_MOBILE = 'B'; // sms-capable

@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: esolitos
- * Date: 01/02/2018
- * Time: 16:32
- */
 
-namespace Ramsalt\OAuth2\Client\Provider;
+namespace ConnectID\Api\DataModel;
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
@@ -95,7 +89,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   /**
    * @param array $data
    *
-   * @return \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile
+   * @return \ConnectID\Api\DataModel\ConnectIdProfile
    */
   public static function createFromApiResponse(array $data): ConnectIdProfile {
     $profile = new static($data);
@@ -139,7 +133,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/customer/profile.html
    * @see https://doc.mediaconnect.no/doc/ConnectID/v2/api/customer/profile.html
    *
-   * @param \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile $profile
+   * @param \ConnectID\Api\DataModel\ConnectIdProfile $profile
    * @param array $data
    */
   public static function setDataFromKeys(ConnectIdProfile $profile, array $data) {
@@ -157,7 +151,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return string
    */
   public function getUniqueId(): string {
-    return $this->uniqueId;
+    return $this->uniqueId ?: '';
   }
 
   /**
@@ -169,10 +163,11 @@ class ConnectIdProfile implements ResourceOwnerInterface {
     $this->uniqueId = $uniqueId;
     return $this;
   }
+
   /**
-   * @return int
+   * @return int|null
    */
-  public function getUserId(): int {
+  public function getUserId(): ?int {
     return $this->userId;
   }
 
@@ -187,9 +182,9 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   }
 
   /**
-   * @return int
+   * @return string|null
    */
-  public function getCustomerNumber(): string {
+  public function getCustomerNumber(): ?string {
     return $this->customerNumber;
   }
 
@@ -228,7 +223,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return string
    */
   public function getFirstName(): string {
-    return $this->firstName;
+    return $this->firstName ?: '';
   }
 
   /**
@@ -245,7 +240,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return string
    */
   public function getMiddleName(): string {
-    return $this->middleName;
+    return $this->middleName ?: '';
   }
 
   /**
@@ -262,7 +257,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return string
    */
   public function getLastName(): string {
-    return $this->lastName;
+    return $this->lastName ?: '';
   }
 
   /**
@@ -279,7 +274,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return string
    */
   public function getCompanyName(): string {
-    return $this->companyName;
+    return $this->companyName ?: '';
   }
 
   /**
@@ -296,7 +291,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return array
    */
   public function getPhoneNumbers(): array {
-    return $this->phoneNumbers;
+    return $this->phoneNumbers ?: [];
   }
 
   /**
@@ -325,7 +320,18 @@ class ConnectIdProfile implements ResourceOwnerInterface {
    * @return array
    */
   public function getEmails(): array {
-    return $this->emails;
+    return $this->emails ?: [];
+  }
+
+  /**
+   * @return string
+   */
+  public function getEmailDefault(): ?string {
+    if (!empty($this->emails)) {
+      return reset($this->emails);
+    }
+
+    return NULL;
   }
 
   /**
@@ -356,17 +362,31 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   }
 
   /**
+   * @return bool
+   */
+  public function isEmailCredential(): bool {
+    return strtoupper($this->getCredentialType()) === 'A';
+  }
+
+  /**
+   * @return bool
+   */
+  public function isPhoneCredential(): bool {
+    return strtoupper($this->getCredentialType()) === 'B';
+  }
+
+  /**
    * @return string User's credentials
    */
   public function getCredential(): string {
-    return $this->credential;
+    return $this->credential ?: '';
   }
 
   /**
    * @return string User's credentials
    */
   public function getCredentialType(): string {
-    return $this->credentialType;
+    return $this->credentialType ?: '';
   }
 
   /**
@@ -386,7 +406,7 @@ class ConnectIdProfile implements ResourceOwnerInterface {
   /**
    * @param array $credential
    *
-   * @return \Ramsalt\OAuth2\Client\Provider\ConnectIdProfile
+   * @return \ConnectID\Api\DataModel\ConnectIdProfile
    */
   public function withCombinedCredential(array $credential): ConnectIdProfile {
     /*
