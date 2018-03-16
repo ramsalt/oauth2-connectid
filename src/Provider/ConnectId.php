@@ -63,6 +63,28 @@ class ConnectId extends AbstractProvider {
 
   }
 
+  public function getLoginUrl(array $params) {
+    if (!isset($params['clientId'])) {
+      $params['clientId'] = $this->clientId;
+    }
+    $base = $this->getLoginApiUrl('login');
+    $query = $this->buildQueryString($params);
+
+    return $this->appendQuery($base, $query);
+
+  }
+
+  public function getLogoutUrl(array $params) {
+    if (!isset($params['clientId'])) {
+      $params['clientId'] = $this->clientId;
+    }
+    $base = $this->getLoginApiUrl('logout');
+    $query = $this->buildQueryString($params);
+
+    return $this->appendQuery($base, $query);
+
+  }
+
   public function getResourceOwnerDetailsUrl(AccessToken $token) {
     return $this->getClientApiUrl('v1/customer/profile');
   }
