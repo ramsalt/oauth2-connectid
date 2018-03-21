@@ -101,7 +101,7 @@ class OrderStatus extends BasicData {
   }
 
   /**
-   * @return int
+   * @return null|float
    */
   public function getOrderAmount(): ?float {
     return $this->orderAmount;
