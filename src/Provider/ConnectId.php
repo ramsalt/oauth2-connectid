@@ -359,12 +359,14 @@ class ConnectId extends AbstractProvider {
   }
 
   /**
-   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   * @param \ConnectID\Api\DataModel\ProductType $productType
    *
-   * @return ProductTypeList
+   * @return \ConnectID\Api\DataModel\CouponTypeList
    */
-  public function getClientApiCoupons(AccessToken $accessToken, ProductType $productType) {
+  public function getClientApiCoupons(ProductType $productType) {
     $url = $this->getClientApiUrl('v1/client/coupon/' . $productType->getProduct());
+    $accessToken = $this->getClientCredentialsAccessToken();
+
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
