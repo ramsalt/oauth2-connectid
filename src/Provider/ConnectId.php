@@ -236,9 +236,6 @@ class ConnectId extends AbstractProvider {
       );
     }
 
-    // Get the new token for client credentials
-    $this->getAccessToken('client_credentials');
-
     return $response;
   }
 
