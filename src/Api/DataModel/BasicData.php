@@ -49,7 +49,7 @@ abstract class BasicData {
       }
       // Format date with default format.
       elseif (is_object($value) && is_a($value, \DateTimeInterface::class)) {
-        $properties[$key] = $this->getFormattedDate($value);
+        $properties[$key] = $this->getFormattedDate($value, 'U');
       }
       elseif (is_object($value) && method_exists($value, 'toArray')) {
         $properties[$key] = $value->toArray();
