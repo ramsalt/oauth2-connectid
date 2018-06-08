@@ -148,7 +148,7 @@ class ConnectId extends AbstractProvider {
       if (isset($data['error_description'])) {
         $message .= ': ' . $data['error_description'];
       }
-      throw new InvalidGrantException($message, self::RFC6749_INVALID_GRANT, $response);
+      throw new InvalidGrantException($message, $statusCode, $response);
     }
 
     // Check if the error is to be attributed to an expired Access Token.
@@ -166,7 +166,7 @@ class ConnectId extends AbstractProvider {
       if (isset($data['error_description'])) {
         $message .= ': ' . $data['error_description'];
       }
-      throw new InvalidAccessTokenException($message, self::RFC6750_INVALID_TOKEN, $response);
+      throw new InvalidAccessTokenException($message, $statusCode, $response);
     }
 
     // Fallback to a generic exception
