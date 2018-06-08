@@ -135,7 +135,7 @@ class ConnectId extends AbstractProvider {
       );
     }
 
-    if ($statusCode == 400 && $data['error'] == self::RFC6749_INVALID_GRANT) {
+    if (($statusCode >= 400 && $statusCode < 500) && $data['error'] == self::RFC6749_INVALID_GRANT) {
       /*
        * The provided authorization grant (e.g., authorization code, resource
        * owner credentials) or refresh token is invalid, expired, revoked, does
@@ -148,16 +148,25 @@ class ConnectId extends AbstractProvider {
       if (isset($data['error_description'])) {
         $message .= ': ' . $data['error_description'];
       }
-      throw new InvalidGrantException($message, $statusCode, $response);
+      throw new InvalidGrantException($message, self::RFC6749_INVALID_GRANT, $response);
     }
 
     // Check if the error is to be attributed to an expired Access Token.
     if ($statusCode == 401 && $data['error'] == self::RFC6750_INVALID_TOKEN) {
+      /**
+       * The access token provided is expired, revoked, malformed, or invalid
+       * for other reasons.  The resource SHOULD respond with the HTTP 401
+       * (Unauthorized) status code.  The client MAY request a new access token
+       * and retry the protected resource request.
+       *
+       * @see https://tools.ietf.org/html/rfc6750#section-3.1
+       * @see https://tools.ietf.org/html/rfc6750#section-6.2.2
+       */
       $message = $data['error'];
       if (isset($data['error_description'])) {
         $message .= ': ' . $data['error_description'];
       }
-      throw new InvalidAccessTokenException($message, $statusCode, $response);
+      throw new InvalidAccessTokenException($message, self::RFC6750_INVALID_TOKEN, $response);
     }
 
     // Fallback to a generic exception
