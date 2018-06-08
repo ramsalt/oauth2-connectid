@@ -210,10 +210,10 @@ class ConnectIdProfile implements ResourceOwnerInterface {
       $full_name[] = $this->firstName;
     }
     if ($this->middleName) {
-      $full_name[] = $this->firstName;
+      $full_name[] = $this->middleName;
     }
     if ($this->lastName) {
-      $full_name[] = $this->firstName;
+      $full_name[] = $this->lastName;
     }
 
     return implode($separator, $full_name);
