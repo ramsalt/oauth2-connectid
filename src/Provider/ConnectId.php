@@ -3,6 +3,7 @@
 namespace Ramsalt\OAuth2\Client\Provider;
 
 
+use ConnectID\Api\DataModel\ConnectIdProfile;
 use ConnectID\Api\DataModel\CouponTypeList;
 use ConnectID\Api\DataModel\Order;
 use ConnectID\Api\DataModel\OrdersOverview;
@@ -16,12 +17,29 @@ use Psr\Http\Message\ResponseInterface;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidApiResponseException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException;
-use ConnectID\Api\DataModel\ConnectIdProfile;
 
 class ConnectId extends AbstractProvider {
 
-  const ERROR_AUTH_INVALID_TOKEN = 'invalid_token';
-  const ERROR_AUTH_INVALID_GRANT = 'invalid_grant';
+  /**
+   * Error identifiers as defined in the OAuth 2.0 RFC 6749
+   *
+   * @see https://tools.ietf.org/html/rfc6749#section-5.2
+   */
+  const RFC6749_INVALID_REQUEST = 'invalid_request';
+  const RFC6749_INVALID_CLIENT = 'invalid_client';
+  const RFC6749_INVALID_GRANT = 'invalid_grant';
+  const RFC6749_UNAUTHORIZED_CLIENT = 'unauthorized_client';
+  const RFC6749_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type';
+  const RFC6749_INVALID_SCOPE = 'invalid_scope';
+
+  /**
+   * Error identifiers as defined in the OAuth 2.0 RFC 6750
+   *
+   * @see https://tools.ietf.org/html/rfc6750#section-6.2
+   */
+  const RFC6750_INVALID_REQUEST = 'invalid_request';
+  const RFC6750_INVALID_TOKEN = 'invalid_token';
+  const RFC6750_INSUFFICIENT_SCOPE = 'insufficient_scope';
 
   use BearerAuthorizationTrait;
   /*
@@ -102,9 +120,8 @@ class ConnectId extends AbstractProvider {
    * @param \Psr\Http\Message\ResponseInterface $response
    * @param array|string                        $data
    *
-   * @throws \Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException
+   * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
    * @throws \Ramsalt\OAuth2\Client\Provider\Exception\InvalidApiResponseException
-   * @throws \Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException
    */
   protected function checkResponse(ResponseInterface $response, $data) {
     $statusCode = $response->getStatusCode();
@@ -118,21 +135,29 @@ class ConnectId extends AbstractProvider {
       );
     }
 
-    if ($statusCode == 400 && $data['error'] == self::ERROR_AUTH_INVALID_GRANT) {
-      throw new InvalidGrantException(
-        $data['error_description'] ?? $data['error'],
-        $statusCode,
-        $response
-      );
+    if ($statusCode == 400 && $data['error'] == self::RFC6749_INVALID_GRANT) {
+      /*
+       * The provided authorization grant (e.g., authorization code, resource
+       * owner credentials) or refresh token is invalid, expired, revoked, does
+       * not match the redirection URI used in the authorization request, or was
+       * issued to another client.
+       *
+       * @see https://tools.ietf.org/html/rfc6749#section-5.2
+       */
+      $message = $data['error'];
+      if (isset($data['error_description'])) {
+        $message .= ': ' . $data['error_description'];
+      }
+      throw new InvalidGrantException($message, $statusCode, $response);
     }
 
     // Check if the error is to be attributed to an expired Access Token.
-    if ($statusCode == 401 && $data['error'] == self::ERROR_AUTH_INVALID_TOKEN) {
-      throw new InvalidAccessTokenException(
-        $data['error_description'] ?? $data['error'],
-        $statusCode,
-        $response
-      );
+    if ($statusCode == 401 && $data['error'] == self::RFC6750_INVALID_TOKEN) {
+      $message = $data['error'];
+      if (isset($data['error_description'])) {
+        $message .= ': ' . $data['error_description'];
+      }
+      throw new InvalidAccessTokenException($message, $statusCode, $response);
     }
 
     // Fallback to a generic exception
