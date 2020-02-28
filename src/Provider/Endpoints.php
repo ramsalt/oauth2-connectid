@@ -14,6 +14,11 @@ final class Endpoints {
     return self::getOAuthUrl('token', $testing);
   }
 
+  public static function getResourceOwnerDetailsUrl(bool $testing = FALSE) {
+    return self::getClientApiUrl('v1/customer/profile', $testing);
+  }
+
+
   /**
    * Returns the url for login authentication process.
    *

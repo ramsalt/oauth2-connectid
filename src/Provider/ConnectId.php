@@ -68,7 +68,7 @@ class ConnectId extends AbstractProvider {
   }
 
   public function getResourceOwnerDetailsUrl(AccessToken $token) {
-    return Endpoints::getClientApiUrl('v1/customer/profile', $this->testing);
+    return Endpoints::getResourceOwnerDetailsUrl($this->testing);
   }
 
   protected function getDefaultScopes() {
