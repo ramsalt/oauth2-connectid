@@ -53,11 +53,11 @@ class ConnectId extends AbstractProvider {
   protected $testing = FALSE;
 
   public function getBaseAuthorizationUrl() {
-    return $this->getOAuthUrl('authorize');
+    return Endpoints::getOAuthUrl('authorize', $this->testing);
   }
 
   public function getBaseAccessTokenUrl(array $params) {
-    return $this->getOAuthUrl('token');
+    return Endpoints::getOAuthUrl('token', $this->testing);
   }
 
   protected function getAccessTokenUrl(array $params) {
@@ -67,41 +67,8 @@ class ConnectId extends AbstractProvider {
     return $this->appendQuery($url, $query);
   }
 
-  public function getRegistrationUrl(array $params) {
-    if (!isset($params['clientId'])) {
-      $params['clientId'] = $this->clientId;
-    }
-    $base = $this->getLoginApiUrl('createUser');
-    $query = $this->buildQueryString($params);
-
-    return $this->appendQuery($base, $query);
-
-  }
-
-  public function getLoginUrl(array $params) {
-    if (!isset($params['clientId'])) {
-      $params['clientId'] = $this->clientId;
-    }
-    $base = $this->getLoginApiUrl('login');
-    $query = $this->buildQueryString($params);
-
-    return $this->appendQuery($base, $query);
-
-  }
-
-  public function getLogoutUrl(array $params) {
-    if (!isset($params['clientId'])) {
-      $params['clientId'] = $this->clientId;
-    }
-    $base = $this->getLoginApiUrl('logout');
-    $query = $this->buildQueryString($params);
-
-    return $this->appendQuery($base, $query);
-
-  }
-
   public function getResourceOwnerDetailsUrl(AccessToken $token) {
-    return $this->getClientApiUrl('v1/customer/profile');
+    return Endpoints::getClientApiUrl('v1/customer/profile', $this->testing);
   }
 
   protected function getDefaultScopes() {
@@ -187,40 +154,6 @@ class ConnectId extends AbstractProvider {
     return ConnectIdProfile::createFromApiResponse($response);
   }
 
-  /**
-   * Returns the url for login authentication process.
-   *
-   * @param string $extra_path
-   *
-   * @return string
-   */
-  protected function getOAuthUrl(string $extra_path) {
-    return $this->getLoginApiUrl("oauth/{$extra_path}");
-  }
-
-  /**
-   * Returns the url for login authentication process.
-   *
-   * @param string $extra_path
-   *
-   * @return string
-   */
-  protected function getLoginApiUrl(string $extra_path) {
-    $base = ($this->testing) ? 'api-test.mediaconnect.no/login' : 'connectid.no/user';
-
-    return "https://{$base}/{$extra_path}";
-  }
-
-  /**
-   * @param string $extra_path
-   *
-   * @return string
-   */
-  protected function getClientApiUrl(string $extra_path) {
-    $domain = ($this->testing) ? 'api-test.mediaconnect.no' : 'api.mediaconnect.no';
-
-    return "https://{$domain}/capi/{$extra_path}";
-  }
 
   /**
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
@@ -255,7 +188,7 @@ class ConnectId extends AbstractProvider {
    * @return array
    */
   public function getApiCustomerProduct(AccessToken $token): array {
-    $url = $this->getClientApiUrl('v1/customer/product');
+    $url = Endpoints::getClientApiUrl('v1/customer/product', $this->testing);
     // $options['headers'], $options['body'], $options['version']
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
 
@@ -279,7 +212,7 @@ class ConnectId extends AbstractProvider {
    * @return \ConnectID\Api\DataModel\OrdersOverview
    */
   public function getApiOrdersOverview(AccessToken $accessToken): OrdersOverview {
-    $url = $this->getClientApiUrl('v1/order/status');
+    $url = Endpoints::getClientApiUrl('v1/order/status', $this->testing);
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
@@ -301,7 +234,7 @@ class ConnectId extends AbstractProvider {
    * @return \ConnectID\Api\DataModel\OrderStatus
    */
   public function getClientApiOrderStatus(string $orderId): OrderStatus {
-    $url = $this->getClientApiUrl('v1/client/order/status/'.$orderId);
+    $url = Endpoints::getClientApiUrl('v1/client/order/status/'.$orderId, $this->testing);
     $accessToken = $this->getClientCredentialsAccessToken();
 
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken)
@@ -327,7 +260,7 @@ class ConnectId extends AbstractProvider {
    * @return \ConnectID\Api\DataModel\Order
    */
   public function submitApiOrder(AccessToken $accessToken, Order $order) {
-    $url = $this->getClientApiUrl('v1/order');
+    $url = Endpoints::getClientApiUrl('v1/order', $this->testing);
     $options = [
       'body' => $order->toJson(),
     ];
@@ -363,7 +296,7 @@ class ConnectId extends AbstractProvider {
       'errorUrl'  => $errorUrl,
     ];
 
-    $url = $this->getLoginApiUrl('order');
+    $url = Endpoints::getLoginApiUrl('order', $this->testing);
     // ConnectID expects the parameters in the urls not the body also for the POST
     $query = $this->getAccessTokenQuery($params);
 
@@ -376,7 +309,7 @@ class ConnectId extends AbstractProvider {
    * @return ProductTypeList
    */
   public function getClientApiProducts(AccessToken $accessToken) {
-    $url = $this->getClientApiUrl('v1/client/product');
+    $url = Endpoints::getClientApiUrl('v1/client/product', $this->testing);
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
@@ -395,7 +328,7 @@ class ConnectId extends AbstractProvider {
    * @return \ConnectID\Api\DataModel\CouponTypeList
    */
   public function getClientApiCoupons(ProductType $productType) {
-    $url = $this->getClientApiUrl('v1/client/coupon/' . $productType->getProduct());
+    $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productType->getProduct(), $this->testing);
     $accessToken = $this->getClientCredentialsAccessToken();
 
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
