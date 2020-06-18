@@ -226,6 +226,14 @@ class ConnectId extends AbstractProvider {
   }
 
   /**
+   * @deprecated Use ::clientApi_getOrderStatus()
+   */
+  public function getClientApiOrderStatus(string $orderId): OrderStatus {
+    trigger_error('Deprecated: Use ' . __CLASS__ . '::clientApi_getOrderStatus() instead.', E_USER_DEPRECATED);
+    return $this->clientApi_getOrderStatus($orderId);
+  }
+
+  /**
    *
    * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/order.html#PaymentInfo
    *
@@ -233,7 +241,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\OrderStatus
    */
-  public function getClientApiOrderStatus(string $orderId): OrderStatus {
+  public function clientApi_getOrderStatus(string $orderId): OrderStatus {
     $url = Endpoints::getClientApiUrl('v1/client/order/status/'.$orderId, $this->testing);
     $accessToken = $this->getClientCredentialsAccessToken();
 
@@ -251,6 +259,40 @@ class ConnectId extends AbstractProvider {
     $order_data = reset($response['orders']);
 
     return OrderStatus::create($order_data);
+  }
+
+
+  /**
+   * API for creating an order with a Client AccessToken.
+   *
+   * @see https://doc.mediaconnect.no/doc/ConnectID/#operation/orderclient
+   *
+   * @param \ConnectID\Api\DataModel\Order               $order
+   *  the order to submit.
+   *
+   * @param \League\OAuth2\Client\Token\AccessToken|null $accessToken
+   *   Optional access toke to use in the request, if none is provided a new one is fetched.
+   */
+  public function clientApi_registerOrder(Order $order, AccessToken $accessToken = NULL) {
+    $url = Endpoints::getClientApiUrl('v1/client/order', $this->testing);
+    $options = [
+      'body' => $order->toJson(),
+    ];
+    if (!$accessToken) {
+      $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
+    }
+    $request = $this->getAuthenticatedRequest(self::METHOD_POST, $url, $accessToken, $options)
+      ->withAddedHeader('Content-Type', 'application/json');
+
+    $response = $this->getParsedResponse($request);
+
+    if (false === is_array($response) || !isset($response['orderId'])) {
+      throw new InvalidApiResponseException(
+        'Invalid response received from Authorization Server. Expected JSON.'
+      );
+    }
+
+    return $order->withOrderId($response['orderId']);
   }
 
   /**
@@ -281,6 +323,13 @@ class ConnectId extends AbstractProvider {
   }
 
   /**
+   * @deprecated Use ::getFulfillmentUrl() instead
+   */
+  public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
+    return $this->getFulfillmentUrl($order->getOrderId(), $returnUrl, $errorUrl);
+  }
+
+  /**
    * @param \ConnectID\Api\DataModel\Order $order
    *
    * @param string                         $returnUrl
@@ -288,10 +337,10 @@ class ConnectId extends AbstractProvider {
    *
    * @return string
    */
-  public function getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
+  public function getOrderFulfillmentUrl(string $orderId, string $returnUrl, string $errorUrl) {
     $params = [
       'clientId'  => $this->clientId,
-      'orderId'   => $order->getOrderId(),
+      'orderId'   => $orderId,
       'returnUrl' => $returnUrl,
       'errorUrl'  => $errorUrl,
     ];
@@ -299,17 +348,21 @@ class ConnectId extends AbstractProvider {
     $url = Endpoints::getLoginApiUrl('order', $this->testing);
     // ConnectID expects the parameters in the urls not the body also for the POST
     $query = $this->getAccessTokenQuery($params);
-
     return $this->appendQuery($url, $query);
   }
+
+
 
   /**
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
    *
    * @return ProductTypeList
    */
-  public function getClientApiProducts(AccessToken $accessToken) {
+  public function getClientApiProducts(AccessToken $accessToken = NULL) {
     $url = Endpoints::getClientApiUrl('v1/client/product', $this->testing);
+    if (!$accessToken) {
+      $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
+    }
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
@@ -327,10 +380,11 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\CouponTypeList
    */
-  public function getClientApiCoupons(ProductType $productType) {
+  public function getClientApiCoupons(ProductType $productType, AccessToken $accessToken = NULL) {
     $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productType->getProduct(), $this->testing);
-    $accessToken = $this->getClientCredentialsAccessToken();
-
+    if (!$accessToken) {
+      $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
+    }
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
