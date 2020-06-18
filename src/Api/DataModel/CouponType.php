@@ -41,6 +41,16 @@ class CouponType extends BasicType {
   protected $extraProducts;
 
   /**
+   * @var int
+   */
+  protected $periodLength;
+
+  /**
+   * @var string
+   */
+  protected $periodType;
+
+  /**
    * @inheritdoc
    */
   public function getId(): string {
@@ -174,6 +184,43 @@ class CouponType extends BasicType {
     $this->extraProducts = $extraProducts;
     return $this;
   }
-  
-  
+
+  /**
+   * @return int
+   */
+  public function getPeriodLength(): ?int {
+    return $this->periodLength;
+  }
+
+
+  /**
+   * @param int $periodLength
+   *
+   * @return CouponType
+   */
+  public function withPeriodLength(int $periodLength): CouponType {
+    $this->periodLength = $periodLength;
+    return $this;
+  }
+
+
+  /**
+   * @return string
+   */
+  public function getPeriodType(): ?string {
+    return $this->periodType;
+  }
+
+
+  /**
+   * @param string $periodType
+   *
+   * @return CouponType
+   */
+  public function withPeriodType(string $periodType): CouponType {
+    $this->periodType = $periodType;
+    return $this;
+  }
+
+
 }
