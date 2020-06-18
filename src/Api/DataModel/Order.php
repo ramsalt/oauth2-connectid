@@ -83,7 +83,7 @@ class Order extends BasicData {
   /**
    * @return int
    */
-  public function getOrderId(): int {
+  public function getOrderId(): ?int {
     return $this->orderId;
   }
 
