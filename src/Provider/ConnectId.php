@@ -203,6 +203,7 @@ class ConnectId extends AbstractProvider {
     return $response;
   }
 
+
   /**
    *
    * @see https://doc.mediaconnect.no/doc/ConnectID/v1/api/order.html#PaymentInfo
@@ -225,6 +226,7 @@ class ConnectId extends AbstractProvider {
     return $response;
   }
 
+
   /**
    * @deprecated Use ::clientApi_getOrderStatus()
    */
@@ -232,6 +234,7 @@ class ConnectId extends AbstractProvider {
     trigger_error('Deprecated: Use ' . __CLASS__ . '::clientApi_getOrderStatus() instead.', E_USER_DEPRECATED);
     return $this->clientApi_getOrderStatus($orderId);
   }
+
 
   /**
    *
@@ -295,6 +298,7 @@ class ConnectId extends AbstractProvider {
     return $order->withOrderId($response['orderId']);
   }
 
+
   /**
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
    * @param \ConnectID\Api\DataModel\Order $order
@@ -322,12 +326,15 @@ class ConnectId extends AbstractProvider {
     return $order;
   }
 
+
   /**
    * @deprecated Use ::getFulfillmentUrl() instead
    */
   public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
+    trigger_error('Deprecated: Use ' . __CLASS__ . '::getFulfillmentUrl() instead.', E_USER_DEPRECATED);
     return $this->getFulfillmentUrl($order->getOrderId(), $returnUrl, $errorUrl);
   }
+
 
   /**
    * @param \ConnectID\Api\DataModel\Order $order
@@ -352,7 +359,6 @@ class ConnectId extends AbstractProvider {
   }
 
 
-
   /**
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
    *
@@ -375,13 +381,26 @@ class ConnectId extends AbstractProvider {
     return ProductTypeList::fromDataArray($response['products']);
   }
 
+
   /**
-   * @param \ConnectID\Api\DataModel\ProductType $productType
+   * @deprecated Use ::clientApi_getProductCoupons()
+   */
+  public function getClientApiCoupons(ProductType $productType, AccessToken $accessToken = NULL) {
+    trigger_error('Deprecated: Use ' . __CLASS__ . '::clientApi_getProductCoupons() instead.', E_USER_DEPRECATED);
+    return $this->clientApi_getProductCoupons(
+      $productType->getProduct(),
+      $accessToken
+    );
+  }
+
+
+  /**
+   * @param string $productCode
    *
    * @return \ConnectID\Api\DataModel\CouponTypeList
    */
-  public function getClientApiCoupons(ProductType $productType, AccessToken $accessToken = NULL) {
-    $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productType->getProduct(), $this->testing);
+  public function clientApi_getProductCoupons(string $productCode, AccessToken $accessToken = NULL) {
+    $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productCode, $this->testing);
     if (!$accessToken) {
       $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
     }
