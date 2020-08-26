@@ -331,7 +331,16 @@ class ConnectId extends AbstractProvider {
    */
   public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
     trigger_error('Deprecated: Use ' . __CLASS__ . '::getFulfillmentUrl() instead.', E_USER_DEPRECATED);
-    return $this->getOrderFulfillmentUrl($order->getOrderId(), $returnUrl, $errorUrl);
+    $params = [
+      'clientId'  => $this->clientId,
+      'orderId'   => $order->getOrderId(),
+      'returnUrl' => $returnUrl,
+      'errorUrl'  => $errorUrl,
+    ];
+
+    $url = Endpoints::getLoginApiUrl('order', $this->testing);
+    $query = $this->getAccessTokenQuery($params);
+    return $this->appendQuery($url, $query);
   }
 
 
@@ -351,7 +360,7 @@ class ConnectId extends AbstractProvider {
       'errorUrl'  => $errorUrl,
     ];
 
-    $url = Endpoints::getLoginApiUrl('order', $this->testing);
+    $url = Endpoints::getLoginApiUrl('fulfillment', $this->testing);
     // ConnectID expects the parameters in the urls not the body also for the POST
     $query = $this->getAccessTokenQuery($params);
     return $this->appendQuery($url, $query);
