@@ -4,6 +4,13 @@
 namespace Ramsalt\OAuth2\Client\Provider;
 
 
+/**
+ * @see https://connectid.no/user/
+ * @see https://api-test.mediaconnect.no/login/
+ *
+ * @see https://api.mediaconnect.no/capi
+ * @see https://api-test.mediaconnect.no/capi/
+ */
 final class Endpoints {
 
   public static function getBaseAuthorizationUrl(bool $testing = FALSE): string {
