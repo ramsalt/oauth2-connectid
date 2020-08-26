@@ -25,21 +25,21 @@ class ConnectId extends AbstractProvider {
    *
    * @see https://tools.ietf.org/html/rfc6749#section-5.2
    */
-  const RFC6749_INVALID_REQUEST = 'invalid_request';
-  const RFC6749_INVALID_CLIENT = 'invalid_client';
-  const RFC6749_INVALID_GRANT = 'invalid_grant';
-  const RFC6749_UNAUTHORIZED_CLIENT = 'unauthorized_client';
-  const RFC6749_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type';
-  const RFC6749_INVALID_SCOPE = 'invalid_scope';
+  public const RFC6749_INVALID_REQUEST = 'invalid_request';
+  public const RFC6749_INVALID_CLIENT = 'invalid_client';
+  public const RFC6749_INVALID_GRANT = 'invalid_grant';
+  public const RFC6749_UNAUTHORIZED_CLIENT = 'unauthorized_client';
+  public const RFC6749_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type';
+  public const RFC6749_INVALID_SCOPE = 'invalid_scope';
 
   /**
    * Error identifiers as defined in the OAuth 2.0 RFC 6750
    *
    * @see https://tools.ietf.org/html/rfc6750#section-6.2
    */
-  const RFC6750_INVALID_REQUEST = 'invalid_request';
-  const RFC6750_INVALID_TOKEN = 'invalid_token';
-  const RFC6750_INSUFFICIENT_SCOPE = 'insufficient_scope';
+  public const RFC6750_INVALID_REQUEST = 'invalid_request';
+  public const RFC6750_INVALID_TOKEN = 'invalid_token';
+  public const RFC6750_INSUFFICIENT_SCOPE = 'insufficient_scope';
 
   use BearerAuthorizationTrait;
   /*
