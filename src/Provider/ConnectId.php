@@ -6,7 +6,6 @@ namespace Ramsalt\OAuth2\Client\Provider;
 use ConnectID\Api\DataModel\ConnectIdProfile;
 use ConnectID\Api\DataModel\CouponTypeList;
 use ConnectID\Api\DataModel\Order;
-use ConnectID\Api\DataModel\OrdersOverview;
 use ConnectID\Api\DataModel\OrderStatus;
 use ConnectID\Api\DataModel\ProductType;
 use ConnectID\Api\DataModel\ProductTypeList;
@@ -17,6 +16,8 @@ use Psr\Http\Message\ResponseInterface;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidAccessTokenException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidApiResponseException;
 use Ramsalt\OAuth2\Client\Provider\Exception\InvalidGrantException;
+use RuntimeException;
+use UnexpectedValueException;
 
 class ConnectId extends AbstractProvider {
 
@@ -172,9 +173,7 @@ class ConnectId extends AbstractProvider {
    * @return \League\OAuth2\Client\Token\AccessToken
    */
   public function getClientCredentialsAccessToken() {
-    $client_credentials_token = $this->getAccessToken('client_credentials');
-
-    return $client_credentials_token;
+    return $this->getAccessToken('client_credentials');
   }
 
   /* ========================= ConnectID API ========================= */
@@ -195,7 +194,7 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (false === is_array($response)) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
@@ -212,13 +211,13 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\OrdersOverview
    */
-  public function getApiOrdersOverview(AccessToken $accessToken): OrdersOverview {
+  public function getApiOrdersOverview(AccessToken $accessToken): array {
     $url = Endpoints::getClientApiUrl('v1/order/status', $this->testing);
     $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $accessToken);
     $response = $this->getParsedResponse($request);
 
     if (false === is_array($response)) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
@@ -253,7 +252,7 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (false === is_array($response) || !isset($response['orders'])) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
@@ -290,8 +289,8 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (false === is_array($response) || !isset($response['orderId'])) {
-      throw new InvalidApiResponseException(
-        'Invalid response received from Authorization Server. Expected JSON.'
+      throw new RuntimeException(
+        'Invalid response received from Authorization Server. Expected JSON.',
       );
     }
 
@@ -316,7 +315,7 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (false === is_array($response) || !isset($response['orderId'])) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from Authorization Server. Expected JSON.'
       );
     }
@@ -332,7 +331,7 @@ class ConnectId extends AbstractProvider {
    */
   public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
     trigger_error('Deprecated: Use ' . __CLASS__ . '::getFulfillmentUrl() instead.', E_USER_DEPRECATED);
-    return $this->getFulfillmentUrl($order->getOrderId(), $returnUrl, $errorUrl);
+    return $this->getOrderFulfillmentUrl($order->getOrderId(), $returnUrl, $errorUrl);
   }
 
 
@@ -373,7 +372,7 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (!is_array($response) || !isset($response['products'])) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from API Server. Exp[ected json with a "products" key.'
       );
     }
@@ -408,7 +407,7 @@ class ConnectId extends AbstractProvider {
     $response = $this->getParsedResponse($request);
 
     if (!is_array($response) || !isset($response['coupons'])) {
-      throw new \UnexpectedValueException(
+      throw new UnexpectedValueException(
         'Invalid response received from API Server. Expected json with a "products" key.'
       );
     }
