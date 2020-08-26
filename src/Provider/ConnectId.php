@@ -161,7 +161,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return \League\OAuth2\Client\Token\AccessToken
    */
-  public function getRefreshedAccessToken(AccessToken $accessToken) {
+  public function getRefreshedAccessToken(AccessToken $accessToken): AccessToken {
     $fresh_access_token = $this->getAccessToken('refresh_token', [
       'refresh_token' => $accessToken->getRefreshToken(),
     ]);
@@ -172,7 +172,7 @@ class ConnectId extends AbstractProvider {
   /**
    * @return \League\OAuth2\Client\Token\AccessToken
    */
-  public function getClientCredentialsAccessToken() {
+  public function getClientCredentialsAccessToken(): AccessToken {
     return $this->getAccessToken('client_credentials');
   }
 
@@ -275,7 +275,7 @@ class ConnectId extends AbstractProvider {
    * @param \League\OAuth2\Client\Token\AccessToken|null $accessToken
    *   Optional access toke to use in the request, if none is provided a new one is fetched.
    */
-  public function clientApi_registerOrder(Order $order, AccessToken $accessToken = NULL) {
+  public function clientApi_registerOrder(Order $order, AccessToken $accessToken = NULL): Order {
     $url = Endpoints::getClientApiUrl('v1/client/order', $this->testing);
     $options = [
       'body' => $order->toJson(),
@@ -304,7 +304,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\Order
    */
-  public function submitApiOrder(AccessToken $accessToken, Order $order) {
+  public function submitApiOrder(AccessToken $accessToken, Order $order): Order {
     $url = Endpoints::getClientApiUrl('v1/order', $this->testing);
     $options = [
       'body' => $order->toJson(),
@@ -329,7 +329,7 @@ class ConnectId extends AbstractProvider {
   /**
    * @deprecated Use ::getFulfillmentUrl() instead
    */
-  public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl) {
+  public function  getCompleteOrderUrl(Order $order, string $returnUrl, string $errorUrl): string {
     trigger_error('Deprecated: Use ' . __CLASS__ . '::getFulfillmentUrl() instead.', E_USER_DEPRECATED);
     $params = [
       'clientId'  => $this->clientId,
@@ -352,7 +352,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return string
    */
-  public function getOrderFulfillmentUrl(string $orderId, string $returnUrl, string $errorUrl) {
+  public function getOrderFulfillmentUrl(string $orderId, string $returnUrl, string $errorUrl): string {
     $params = [
       'clientId'  => $this->clientId,
       'orderId'   => $orderId,
@@ -372,7 +372,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return ProductTypeList
    */
-  public function getClientApiProducts(AccessToken $accessToken = NULL) {
+  public function getClientApiProducts(AccessToken $accessToken = NULL): ProductTypeList {
     $url = Endpoints::getClientApiUrl('v1/client/product', $this->testing);
     if (!$accessToken) {
       $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
@@ -393,7 +393,7 @@ class ConnectId extends AbstractProvider {
   /**
    * @deprecated Use ::clientApi_getProductCoupons()
    */
-  public function getClientApiCoupons(ProductType $productType, AccessToken $accessToken = NULL) {
+  public function getClientApiCoupons(ProductType $productType, AccessToken $accessToken = NULL): CouponTypeList {
     trigger_error('Deprecated: Use ' . __CLASS__ . '::clientApi_getProductCoupons() instead.', E_USER_DEPRECATED);
     return $this->clientApi_getProductCoupons(
       $productType->getProduct(),
@@ -407,7 +407,7 @@ class ConnectId extends AbstractProvider {
    *
    * @return \ConnectID\Api\DataModel\CouponTypeList
    */
-  public function clientApi_getProductCoupons(string $productCode, AccessToken $accessToken = NULL) {
+  public function clientApi_getProductCoupons(string $productCode, AccessToken $accessToken = NULL): CouponTypeList {
     $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productCode, $this->testing);
     if (!$accessToken) {
       $accessToken = $accessToken = $this->getClientCredentialsAccessToken();
