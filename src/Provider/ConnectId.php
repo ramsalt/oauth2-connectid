@@ -95,7 +95,7 @@ class ConnectId extends AbstractProvider {
     $statusCode = $response->getStatusCode();
 
     // Exception on the other side
-    if ($statusCode == 400 && isset($data['exceptionType'], $data['errorMessage'])) {
+    if ($statusCode === 400 && isset($data['exceptionType'], $data['errorMessage'])) {
       throw new InvalidApiResponseException(
         "[{$data['exceptionType']}] {$data['errorMessage']}",
         $statusCode,
@@ -103,7 +103,7 @@ class ConnectId extends AbstractProvider {
       );
     }
 
-    if (($statusCode >= 400 && $statusCode < 500) && $data['error'] == self::RFC6749_INVALID_GRANT) {
+    if (($statusCode >= 400 && $statusCode < 500) && $data['error'] === self::RFC6749_INVALID_GRANT) {
       /*
        * The provided authorization grant (e.g., authorization code, resource
        * owner credentials) or refresh token is invalid, expired, revoked, does
@@ -120,7 +120,7 @@ class ConnectId extends AbstractProvider {
     }
 
     // Check if the error is to be attributed to an expired Access Token.
-    if ($statusCode == 401 && $data['error'] == self::RFC6750_INVALID_TOKEN) {
+    if ($statusCode === 401 && $data['error'] === self::RFC6750_INVALID_TOKEN) {
       /**
        * The access token provided is expired, revoked, malformed, or invalid
        * for other reasons.  The resource SHOULD respond with the HTTP 401
@@ -162,11 +162,9 @@ class ConnectId extends AbstractProvider {
    * @return \League\OAuth2\Client\Token\AccessToken
    */
   public function getRefreshedAccessToken(AccessToken $accessToken): AccessToken {
-    $fresh_access_token = $this->getAccessToken('refresh_token', [
+    return $this->getAccessToken('refresh_token', [
       'refresh_token' => $accessToken->getRefreshToken(),
     ]);
-
-    return $fresh_access_token;
   }
 
   /**
@@ -209,7 +207,7 @@ class ConnectId extends AbstractProvider {
    *
    * @param \League\OAuth2\Client\Token\AccessToken $accessToken
    *
-   * @return \ConnectID\Api\DataModel\OrdersOverview
+   * @return array
    */
   public function getApiOrdersOverview(AccessToken $accessToken): array {
     $url = Endpoints::getClientApiUrl('v1/order/status', $this->testing);
@@ -345,10 +343,9 @@ class ConnectId extends AbstractProvider {
 
 
   /**
-   * @param \ConnectID\Api\DataModel\Order $order
-   *
-   * @param string                         $returnUrl
-   * @param string                         $errorUrl
+   * @param string $orderId
+   * @param string $returnUrl
+   * @param string $errorUrl
    *
    * @return string
    */
@@ -368,9 +365,10 @@ class ConnectId extends AbstractProvider {
 
 
   /**
-   * @param \League\OAuth2\Client\Token\AccessToken $accessToken
+   * @param \League\OAuth2\Client\Token\AccessToken|null $accessToken
    *
    * @return ProductTypeList
+   * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
    */
   public function getClientApiProducts(AccessToken $accessToken = NULL): ProductTypeList {
     $url = Endpoints::getClientApiUrl('v1/client/product', $this->testing);
@@ -403,9 +401,12 @@ class ConnectId extends AbstractProvider {
 
 
   /**
-   * @param string $productCode
+   * @param string                                       $productCode
+   *
+   * @param \League\OAuth2\Client\Token\AccessToken|null $accessToken
    *
    * @return \ConnectID\Api\DataModel\CouponTypeList
+   * @throws \League\OAuth2\Client\Provider\Exception\IdentityProviderException
    */
   public function clientApi_getProductCoupons(string $productCode, AccessToken $accessToken = NULL): CouponTypeList {
     $url = Endpoints::getClientApiUrl('v1/client/coupon/' . $productCode, $this->testing);
