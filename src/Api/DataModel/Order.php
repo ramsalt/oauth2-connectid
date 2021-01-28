@@ -4,11 +4,25 @@ namespace ConnectID\Api\DataModel;
 
 class Order extends BasicData {
 
+  /** @var string Paying by using a credit card via Nets */
   const PAYMENT_TYPE_CARD = 'creditcard';
+  /** @var string Paying by sending a invoice */
   const PAYMENT_TYPE_INVOICE = 'invoice';
+  /** @var string It is free of cost*/
   const PAYMENT_TYPE_FREE = 'free';
+  /** @var string Paying by using SMS via Link Mobility */
   const PAYMENT_TYPE_SMS = 'sms';
+  /** @var string Paying by using SMS via SMSpay */
+  const PAYMENT_TYPE_SMSPAY = 'smsPay';
+  /** @var string Paying by using Vipps (Faste betalinger med Vipps)*/
+  const PAYMENT_TYPE_VIPPS = 'vippsRecurring';
+  /** @var string Paying by using Klarna Checkout */
+  const PAYMENT_TYPE_KLARNA = 'kco';
+  /** @var string Paying by using a digital wallet provided by Mastercard. */
   const PAYMENT_TYPE_PASS = 'masterpass';
+  /** @var string Paying by using own integration with payment provider */
+  const PAYMENT_TYPE_OTHER = 'other';
+
 
   /**
    * @var int
